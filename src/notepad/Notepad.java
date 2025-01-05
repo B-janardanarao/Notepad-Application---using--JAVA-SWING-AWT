@@ -1,12 +1,10 @@
 package notepad;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
 import java.io.*;
 import javax.swing.filechooser.*;
-import com.sun.speech.freetts.Voice;
-import com.sun.speech.freetts.VoiceManager;
 
 public class Notepad extends JFrame implements ActionListener {
 
@@ -20,8 +18,9 @@ public class Notepad extends JFrame implements ActionListener {
         setLayout(new BorderLayout());
 
         JMenuBar menuBar = new JMenuBar(); 
-       
-        JMenu file = new JMenu("File");
+
+        JMenu file = new JMenu("File"); 
+
         JMenuItem newdoc = new JMenuItem("New");
         newdoc.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         newdoc.addActionListener(this);
@@ -42,8 +41,8 @@ public class Notepad extends JFrame implements ActionListener {
         exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
         exit.addActionListener(this);
 
-        // Edit menu
         JMenu edit = new JMenu("Edit");
+
         JMenuItem copy = new JMenuItem("Copy");
         copy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
         copy.addActionListener(this);
@@ -60,16 +59,8 @@ public class Notepad extends JFrame implements ActionListener {
         selectall.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK));
         selectall.addActionListener(this);
 
-        
-
-        JMenu texttospeech = new JMenu("SpeechAssistant");
-        
-        JMenuItem textToSpeech = new JMenuItem("Text to Speech");
-        textToSpeech.addActionListener(this);
-        texttospeech.add(textToSpeech);
-        
-       
         JMenu about = new JMenu("Help");
+
         JMenuItem notepad = new JMenuItem("About Notepad");
         notepad.addActionListener(this);
 
@@ -85,7 +76,6 @@ public class Notepad extends JFrame implements ActionListener {
         menuBar.add(file);
         menuBar.add(edit);
         menuBar.add(about);
-        menuBar.add(texttospeech);
 
         file.add(newdoc);
         file.add(open);
@@ -101,8 +91,7 @@ public class Notepad extends JFrame implements ActionListener {
         about.add(notepad);
 
         add(scpane, BorderLayout.CENTER);
-       
-        
+
        
         addWindowListener(new WindowAdapter() {
             @Override
@@ -117,14 +106,14 @@ public class Notepad extends JFrame implements ActionListener {
                         "Save");
 
                 if (option == JOptionPane.YES_OPTION) {
-                    
+                   
                     JFileChooser saveDialog = new JFileChooser();
                     saveDialog.setApproveButtonText("Save");
                     int saveOption = saveDialog.showSaveDialog(Notepad.this);
                     if (saveOption == JFileChooser.APPROVE_OPTION) {
                         File file = new File(saveDialog.getSelectedFile() + ".txt");
                         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                            area.write(writer); 
+                            area.write(writer);
                             System.exit(0); 
                         } catch (IOException ex) {
                             ex.printStackTrace();
@@ -136,13 +125,11 @@ public class Notepad extends JFrame implements ActionListener {
                 }
             }
         });
+
         setVisible(true);
-       
     }
 
-    
     public void actionPerformed(ActionEvent ae) {
-    	
         if (ae.getActionCommand().equals("New")) {
             area.setText("");
 
@@ -175,9 +162,7 @@ public class Notepad extends JFrame implements ActionListener {
             }
 
             File fileName = new File(SaveAs.getSelectedFile() + ".txt");
-            BufferedWriter outFile = null;
-            try {
-                outFile = new BufferedWriter(new FileWriter(fileName));
+            try (BufferedWriter outFile = new BufferedWriter(new FileWriter(fileName))) {
                 area.write(outFile);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -198,41 +183,13 @@ public class Notepad extends JFrame implements ActionListener {
             area.replaceRange("", area.getSelectionStart(), area.getSelectionEnd());
         } else if (ae.getActionCommand().equals("Select All")) {
             area.selectAll();
-        } else if (ae.getActionCommand().equals("Text to Speech")) {
-            String textToRead = area.getText().trim();
-            if (textToRead.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "The text area is empty. Please enter text to convert to speech.");
-            } else {
-                textToSpeech(textToRead);
-            }
         } else if (ae.getActionCommand().equals("About Notepad")) {
             new About().setVisible(true);
+
         }
     }
 
-    public void textToSpeech(String text) {
-       
-        System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
-
-        VoiceManager voiceManager = VoiceManager.getInstance();
-        Voice voice = voiceManager.getVoice("kevin16");
-
-        if (voice != null) {
-            voice.allocate();
-            try {
-                voice.speak(text);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                voice.deallocate();
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "Voice 'kevin16' not found.");
-        }
-    }
-
-
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         new Notepad();
     }
 }
